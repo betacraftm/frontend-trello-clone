@@ -3,11 +3,15 @@ import AccessAlarmIcon from '@mui/icons-material/AccessAlarm'
 import ThreeDRotation from '@mui/icons-material/ThreeDRotation'
 import HomeIcon from '@mui/icons-material/Home'
 import { pink } from '@mui/material/colors'
+import Typography from '@mui/material/Typography'
 
 function App() {
   return (
     <>
       <div>betacraft</div>
+
+      <Typography variant="body2" color="text.secondary">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Temporibus modi dolor officiis dolorem commodi quaerat quibusdam, exercitationem perspiciatis iure quisquam possimus labore vitae qui provident porro voluptate itaque eveniet fuga?</Typography>
+
       <Button variant="text">Text</Button>
       <Button variant="contained">Contained</Button>
       <Button variant="outlined">Outlined</Button>
