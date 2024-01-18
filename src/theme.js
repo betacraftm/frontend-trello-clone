@@ -7,21 +7,39 @@ const theme = extendTheme({
     appBarHeight: '58px',
     boardBarHeight: '60px'
   },
-  // colorSchemes: {
-  //   light: {
-  //     palette: {
-  //       primary: teal,
-  //       secondary: deepOrange
-  //     }
-  //   },
-  //   dark: {
-  //     palette: {
-  //       primary: cyan,
-  //       secondary: orange
-  //     }
-  //   }
-  // },
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: teal,
+        secondary: deepOrange
+      }
+    },
+    dark: {
+      palette: {
+        primary: cyan,
+        secondary: orange
+      }
+    }
+  },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          '*::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px'
+          },
+          '*::-webkit-scrollbar-thumb': {
+            backgroundColor: '#bdc3c7',
+            borderRadius: '8px'
+          },
+          '*::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: '#7f8c8d',
+            borderRadius: '8px'
+          }
+        }
+      }
+    },
     MuiButton: {
       styleOverrides: {
         root: {
