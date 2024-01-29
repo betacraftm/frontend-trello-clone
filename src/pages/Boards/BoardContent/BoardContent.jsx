@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
+import { cloneDeep } from 'lodash'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -28,6 +29,10 @@ function BoardContent({ board }) {
     setOrderedColumn(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   }, [board])
 
+  const findColumnByCardId = (cardId) => {
+    return orderedColumn.find(column => column?.cards?.map(card => card._id)?.includes(cardId))
+  }
+
   const handleDragStart = (event) => {
     // console.log('handleDragStart', event)
     setActiveDragItemId(event?.active?.id)
@@ -35,12 +40,74 @@ function BoardContent({ board }) {
     setActiveDragItemData(event?.active?.data?.current)
   }
 
-  const handleDragEnd = (event) => {
-    // console.log('handleDragEnd', event)
+  const handleDragOver = (event) => {
+    // Nếu nhận diện kéo column thì return luôn vì kéo column đã hoạt động tốt
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) return
+    // console.log('handleDragOver', event)
+
+    // Lấy active và over trong event để xử lí
     const { active, over } = event
 
-    if (!over) return
+    // Nếu không có active hay over thì return luôn để tránh bị lỗi
+    if (!active || !over) return
 
+    // Lấy id từ card và over
+    const { id: activeDragingCardId, data: { current: activeDragingCardData } } = active
+    const { id: overCardId } = over
+
+    // Tìm 2 column theo card id
+    const activeColumn = findColumnByCardId(activeDragingCardId)
+    const overColumn = findColumnByCardId(overCardId)
+    // console.log('activeColumn', activeColumn)
+    // console.log('overColumn', overColumn)
+
+    if (!activeColumn || !overColumn) return
+
+    if (activeColumn._id !== overColumn._id) {
+      setOrderedColumn(prevColumn => {
+        const overCardIndex = overColumn?.cards?.findIndex(card => card._id === overCardId)
+        let newCardIndex
+        const isBelowOverItem = active.rect.current.translated &&
+          active.rect.current.translated.top > over.rect.top + over.rect.height
+        const modifier = isBelowOverItem ? 1 : 0
+        newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards?.length + 1
+
+        // console.log('isBelowOverItem', isBelowOverItem)
+        // console.log('modifier', modifier)
+        // console.log('newCardIndex', newCardIndex)
+
+        const nextColumns = cloneDeep(prevColumn)
+        const nextActiveColumn = nextColumns.find(column => column._id === activeColumn._id)
+        const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
+
+        if (nextActiveColumn) {
+          nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDragingCardId)
+          nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
+        }
+        if (nextOverColumn) {
+          nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDragingCardId)
+          nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, activeDragingCardData)
+          nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
+        }
+        return nextColumns
+      })
+    }
+  }
+
+  const handleDragEnd = (event) => {
+    // console.log('handleDragEnd', event)
+
+    // if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
+    //   console.log('Kéo card')
+    // }
+
+    // Lấy active và over trong event để xử lí
+    const { active, over } = event
+
+    // Nếu không có active hay over thì return luôn để tránh bị lỗi
+    if (!active || !over) return
+
+    // Nếu phần tử kéo dịch chuyển ra vị trí khác với vị trí ban đầu thì đặt lại các giá trị về null
     if (active.id !== over.id) {
       // Lấy vị trí cũ từ active
       const oldIndex = orderedColumn.findIndex(c => c._id === active.id)
@@ -59,6 +126,7 @@ function BoardContent({ board }) {
     setActiveDragItemData(null)
   }
 
+  // Tạo prop dropAnimation cho animation khi drop một phần tử
   const dropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
       styles: {
@@ -72,6 +140,7 @@ function BoardContent({ board }) {
   return (
     <DndContext
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       sensors={sensors}
     >
