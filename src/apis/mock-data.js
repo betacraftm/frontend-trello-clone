@@ -32,7 +32,7 @@ export const mockData = {
             boardId: 'board-id-01',
             columnId: 'column-id-01',
             title: 'Title of card 01',
-            description: 'Markdown Syntax (sẽ ở khóa nâng cao nhé)',
+            description: 'Markdown Syntax',
             cover:
               'https://image.nhandan.vn/Uploaded/2024/unqxwpejw/2023_09_24/anh-dep-giao-thong-1626.jpg',
             memberIds: ['test-user-id-01'],
